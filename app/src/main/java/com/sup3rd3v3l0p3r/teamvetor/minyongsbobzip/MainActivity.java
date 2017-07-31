@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     public interface GitHubService {
         @GET("maps/api/place/nearbysearch/json")
-        Call<Repo> listRepos(@Query("location") String location,@Query("keyword")String keyword,@Query("radius")int radius,@Query("key")String key);
+        Call<RetroResults> listRepos(@Query("location") String location,@Query("keyword")String keyword,@Query("radius")int radius,@Query("key")String key);
     }
     public void refresh(View v) {
         googleMap.clear();
@@ -106,17 +106,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         GitHubService service = retrofit.create(GitHubService.class);
 
-        Call<Repo> repos = (Call<Repo>) service.listRepos(lat+","+lon,"치킨",1000,"AIzaSyAE78Um1ZuE9quVniPZSiLEz0Cw9dOPGuk");
-        repos.enqueue(new Callback<Repo>() {
+        Call<RetroResults> repos = (Call<RetroResults>) service.listRepos(lat+","+lon,"치킨",1000,"AIzaSyAE78Um1ZuE9quVniPZSiLEz0Cw9dOPGuk");
+        repos.enqueue(new Callback<RetroResults>() {
             @Override
-            public void onResponse(Call<Repo> call, Response<Repo> response) {
-                Repo user = response.body();
+            public void onResponse(Call<RetroResults> call, Response<RetroResults> response) {
+                RetroResults user = response.body();
                 Log.i("TAG",""+user.getResults().get(0).getGeometry().getLocation().getLat());
             }
             List<ClipData.Item> list;
 
             @Override
-            public void onFailure(Call<Repo> call, Throwable throwable) {
+            public void onFailure(Call<RetroResults> call, Throwable throwable) {
                 Log.i("TAG", "실패함 : "+throwable);
             }
         });
