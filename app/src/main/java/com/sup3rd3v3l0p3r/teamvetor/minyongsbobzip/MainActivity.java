@@ -2,6 +2,7 @@ package com.sup3rd3v3l0p3r.teamvetor.minyongsbobzip;
 
 import android.Manifest;
 import android.app.FragmentManager;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         MapFragment mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         context = getApplicationContext();
+
         gpsInfo = new GpsInfo(context);
         markerOptions = new MarkerOptions();
         textView = (TextView) findViewById(R.id.asdf);
@@ -79,7 +81,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(NowLocation));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(16));
     }
-
+    public interface GitHubService {
+        @GET("maps/api/place/nearbysearch/json")
+        Call<Repo> listRepos(@Query("location") String location,@Query("keyword")String keyword,@Query("radius")int radius,@Query("key")String key);
+    }
     public void refresh(View v) {
         googleMap.clear();
 
@@ -101,26 +106,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         GitHubService service = retrofit.create(GitHubService.class);
 
-        final Call<List<Repo>> repos = (Call<List<Repo>>) service.listRepos(lat+","+lon,"치킨",1000,"AIzaSyAE78Um1ZuE9quVniPZSiLEz0Cw9dOPGuk");
-        repos.enqueue(new Callback<List<Repo>>() {
+        Call<Repo> repos = (Call<Repo>) service.listRepos(lat+","+lon,"치킨",1000,"AIzaSyAE78Um1ZuE9quVniPZSiLEz0Cw9dOPGuk");
+        repos.enqueue(new Callback<Repo>() {
             @Override
-            public void onResponse(Call<List<Repo>> call, Response<List<Repo>> response) {
-                List<Repo> user = response.body();
-                for (int i = 0; i < user.size(); i++)
-                    Log.i("TAG", "" + user.get(i).getVicinity());
+            public void onResponse(Call<Repo> call, Response<Repo> response) {
+                Repo user = response.body();
+                Log.i("TAG",""+user.getResults().get(0).getGeometry().getLocation().getLat());
             }
+            List<ClipData.Item> list;
 
             @Override
-            public void onFailure(Call<List<Repo>> call, Throwable throwable) {
+            public void onFailure(Call<Repo> call, Throwable throwable) {
                 Log.i("TAG", "실패함 : "+throwable);
             }
         });
     }
 
-    public interface GitHubService {
-        @GET("maps/api/place/nearbysearch/json")
-        Call<List<Repo>> listRepos(@Query("location") String location,@Query("keyword")String keyword,@Query("radius")int radius,@Query("key")String key);
-    }
+
 
 
     public void LocationPermissionChecker() {
